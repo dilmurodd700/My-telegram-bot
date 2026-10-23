@@ -1,71 +1,65 @@
 <?php
-// Token va ID'larni kodga yozmang: serverda muhit o'zgaruvchisi sifatida saqlang.
-// Misol: hosting panelida BOT_TOKEN va ADMIN_ID o'zgaruvchilarini kiriting.
-$token    = getenv('BOT_TOKEN') ?: 'BU_YERGA_YANGI_TOKEN';   // faqat sinov uchun
-$admin_id = getenv('ADMIN_ID')  ?: '';                        // o'zingizning Telegram ID'ingiz
-$app_url  = 'https://SIZNING-SAYT.vercel.app';                // Vercel havolangiz (https bo'lishi shart)
+$token = "8699966136:AAHlGLDIP_wPxZGdN_oBthsv0BvuLdaB2Vc";
 
-function tg($method, $data) {
-    global $token;
-    $ch = curl_init("https://api.telegram.org/bot{$token}/{$method}");
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => $data,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 10,
-    ]);
-    $res = curl_exec($ch);
-    if ($res === false) {
-        error_log('Telegram xato: ' . curl_error($ch));
-    }
-    curl_close($ch);
-    return $res;
-}
+$content = file_get_contents("php://input");
+$update = json_decode($content, true);
 
-$update = json_decode(file_get_contents('php://input'), true);
 if (!isset($update['message'])) {
     exit;
 }
 
-$message = $update['message'];
-$chat_id = $message['chat']['id'];
-$text    = $message['text'] ?? '';
+$chat_id = $update['message']['chat']['id'];
+$text = $update['message']['text'] ?? '';
 
-if (isset($message['web_app_data'])) {
-    // Mini App'dan buyurtma keldi
-    $data  = json_decode($message['web_app_data']['data'], true) ?: [];
-    $name  = htmlspecialchars($data['product'] ?? "Noma'lum", ENT_QUOTES, 'UTF-8');
-    $price = htmlspecialchars($data['price'] ?? "Noma'lum", ENT_QUOTES, 'UTF-8');
-
-    tg('sendMessage', [
-        'chat_id'    => $chat_id,
-        'parse_mode' => 'HTML',
-        'text'       => "✅ Buyurtmangiz qabul qilindi!\n\n📦 Mahsulot: <b>{$name}</b>\n💰 Narxi: <b>{$price}</b>\n\nTez orada operatorimiz siz bilan bog'lanadi.",
-    ]);
-
-    // Adminga xabar
-    if ($admin_id !== '') {
-        $user  = $message['from'];
-        $uname = htmlspecialchars(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')), ENT_QUOTES, 'UTF-8');
-        $login = isset($user['username']) ? '@' . htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8') : 'username yo\'q';
-        tg('sendMessage', [
-            'chat_id'    => $admin_id,
-            'parse_mode' => 'HTML',
-            'text'       => "🆕 Yangi buyurtma\n\n👤 {$uname} ({$login})\n📦 {$name}\n💰 {$price}",
-        ]);
-    }
-} elseif ($text === '/start') {
-    // Reply keyboard: sendData faqat shu tugma orqali ishlaydi
+// 1. /start buyrug'i
+if ($text == '/start') {
     $keyboard = [
-        'keyboard' => [[
-            ['text' => '🛍 Katalog ochish', 'web_app' => ['url' => $app_url]],
-        ]],
-        'resize_keyboard' => true,
+        'inline_keyboard' => [
+            [
+                [
+                    'text' => '🛍 Katalog va Savatchani ochish',
+                    'web_app' => ['url' => 'https://telegram-mini-app-ingiz.vercel.app'] // Vercel havolangiz
+                ]
+            ]
+        ]
     ];
 
-    tg('sendMessage', [
-        'chat_id'      => $chat_id,
-        'text'         => 'Xush kelibsiz! Mahsulotlarni tanlash uchun katalogni oching:',
-        'reply_markup' => json_encode($keyboard),
-    ]);
+    $post_data = [
+        'chat_id' => $chat_id,
+        'text' => "Xush kelibsiz! Savatchadan foydalanib buyurtma berish uchun quyidagi tugmani bosing:",
+        'reply_markup' => json_encode($keyboard)
+    ];
+
+    file_get_contents("https://api.telegram.org/bot{$token}/sendMessage?" . http_build_query($post_data));
 }
+
+// 2. Mini App'dan savatcha ma'lumotlari kelganda
+if (isset($update['message']['web_app_data'])) {
+    $web_app_data = $update['message']['web_app_data']['data'];
+    $data = json_decode($web_app_data, true);
+
+    $name = $data['name'] ?? 'Noma\'lum';
+    $phone = $data['phone'] ?? 'Noma\'lum';
+    $total = $data['total'] ?? 0;
+    $items = $data['items'] ?? [];
+
+    $items_text = "";
+    foreach ($items as $item) {
+        $items_text .= "- {$item['name']} ({$item['price']} so'm)\n";
+    }
+
+    $reply_text = "🚨 <b>Yangi buyurtma tushdi!</b>\n\n" .
+                  "👤 Mijoz: <b>{$name}</b>\n" .
+                  "📞 Tel: <b>{$phone}</b>\n\n" .
+                  "📦 <b>Mahsulotlar:</b>\n{$items_text}\n" .
+                  "💰 <b>Jami summa:</b> {$total} so'm";
+
+    $post_data = [
+        'chat_id' => $chat_id,
+        'text' => $reply_text,
+        'parse_mode' => 'HTML'
+    ];
+
+    file_get_contents("https://api.telegram.org/bot{$token}/sendMessage?" . http_build_query($post_data));
+}
+?>
