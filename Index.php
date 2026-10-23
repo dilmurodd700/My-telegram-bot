@@ -20,7 +20,7 @@ if ($text == '/start') {
             [
                 [
                     'text' => '📱 Mini App-ni ochish',
-                    'web_app' => ['url' => 'https://sizning-saytingiz.vercel.app'] // <-- Bu yerga Mini App havolangizni yozasiz
+                    'web_app' => ['url' => 'web_app' => ['url' => 'https://mytelegrambot-smoky.vercel.app'] // <-- Bu yerga Mini App havolangizni yozasiz
                 ]
             ]
         ]
