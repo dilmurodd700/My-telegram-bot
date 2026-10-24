@@ -137,7 +137,8 @@
             color: var(--gold-color);
             letter-spacing: 0.15em;
         }
-.grid {
+
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
