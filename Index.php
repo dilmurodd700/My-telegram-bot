@@ -1,65 +1,324 @@
-<?php
-$token = "8699966136:AAHlGLDIP_wPxZGdN_oBthsv0BvuLdaB2Vc";
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasrat Rom — Premium Deraza Romlari</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Google Fonts: Cartier uslubidagi klassik va zamonaviy shriftlar -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0b0b;
+            --text-color: #f5f5f5;
+            --gold-color: #d4af37;
+            --gold-light: #f3e5ab;
+            --transition-speed: 1.2s;
+        }
 
-$content = file_get_contents("php://input");
-$update = json_decode($content, true);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-if (!isset($update['message'])) {
-    exit;
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            letter-spacing: 0.05em;
+        }
 
-$chat_id = $update['message']['chat']['id'];
-$text = $update['message']['text'] ?? '';
+        h1, h2, h3, .brand-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
 
-// 1. /start buyrug'i
-if ($text == '/start') {
-    $keyboard = [
-        'inline_keyboard' => [
-            [
-                [
-                    'text' => '🛍 Katalog va Savatchani ochish',
-                    'web_app' => ['url' => 'https://telegram-mini-app-ingiz.vercel.app'] // Vercel havolangiz
-                ]
-            ]
-        ]
-    ];
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(11,11,11,0.95), transparent);
+        }
 
-    $post_data = [
-        'chat_id' => $chat_id,
-        'text' => "Xush kelibsiz! Savatchadan foydalanib buyurtma berish uchun quyidagi tugmani bosing:",
-        'reply_markup' => json_encode($keyboard)
-    ];
+        .logo {
+            font-size: 1.2rem;
+            color: var(--gold-color);
+            text-decoration: none;
+            letter-spacing: 0.2em;
+        }
 
-    file_get_contents("https://api.telegram.org/bot{$token}/sendMessage?" . http_build_query($post_data));
-}
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
 
-// 2. Mini App'dan savatcha ma'lumotlari kelganda
-if (isset($update['message']['web_app_data'])) {
-    $web_app_data = $update['message']['web_app_data']['data'];
-    $data = json_decode($web_app_data, true);
+        nav a:hover {
+            color: var(--gold-color);
+        }
 
-    $name = $data['name'] ?? 'Noma\'lum';
-    $phone = $data['phone'] ?? 'Noma\'lum';
-    $total = $data['total'] ?? 0;
-    $items = $data['items'] ?? [];
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0b0b0b 100%);
+        }
 
-    $items_text = "";
-    foreach ($items as $item) {
-        $items_text .= "- {$item['name']} ({$item['price']} so'm)\n";
-    }
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+            animation: fadeInScale 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
 
-    $reply_text = "🚨 <b>Yangi buyurtma tushdi!</b>\n\n" .
-                  "👤 Mijoz: <b>{$name}</b>\n" .
-                  "📞 Tel: <b>{$phone}</b>\n\n" .
-                  "📦 <b>Mahsulotlar:</b>\n{$items_text}\n" .
-                  "💰 <b>Jami summa:</b> {$total} so'm";
+        .hero p {
+            font-size: 1rem;
+            max-width: 600px;
+            color: #b3b3b3;
+            margin-bottom: 35px;
+            animation: fadeIn 2s 0.5s ease forwards;
+            opacity: 0;
+        }
 
-    $post_data = [
-        'chat_id' => $chat_id,
-        'text' => $reply_text,
-        'parse_mode' => 'HTML'
-    ];
+        .btn-gold {
+            display: inline-block;
+            padding: 14px 35px;
+            border: 1px solid var(--gold-color);
+            color: var(--gold-color);
+            background: transparent;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 2s 1s ease forwards;
+            opacity: 0;
+        }
 
-    file_get_contents("https://api.telegram.org/bot{$token}/sendMessage?" . http_build_query($post_data));
-}
-?>
+        .btn-gold:hover {
+            background-color: var(--gold-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+        }
+
+        /* PRODUCTS SECTION */
+        .products {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 60px;
+            color: var(--gold-color);
+            letter-spacing: 0.15em;
+        }
+.grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: #141414;
+            border: 1px solid #222;
+            padding: 30px;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold-color);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--gold-light);
+        }
+
+        .card p {
+            color: #999;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .card-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* PROMPT SECTION (Kod ichida eslatma sifatida) */
+        .prompt-box {
+            background: #111;
+            border: 1px dashed var(--gold-color);
+            padding: 40px 20px;
+            margin: 60px auto;
+            max-width: 1400px;
+            color: #aaa;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .prompt-box h3 {
+            color: var(--gold-color);
+            margin-bottom: 15px;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #1a1a1a;
+            color: #777;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo">HASRAT ROM</a>
+        <nav>
+            <a href="#fasonlar">Fasonlar</a>
+            <a href="#aloqa">Aloqa</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Mukammallik San'ati</h1>
+        <p>Interyeringiz uchun eng yuqori sifat va nafis dizayndagi zamonaviy deraza romlari kolleksiyasi.</p>
+        <a href="#fasonlar" class="btn-gold">Kolleksiyani Ko'rish</a>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="fasonlar">
+        <h2 class="section-title">Eksklyuziv Fasonlar</h2>
+        
+        <div class="grid">
+            <?php
+            // Ma'lumotlar va sozlamalar
+            $bot_token = "8699966136:AAHlGLDIP_wPxZGdN_oBthsv0BvuLdaB2Vc";
+            $vercel_url = "https://mytelegrambot-smoky.vercel.app";
+
+            // 5 ta talab qilingan fasonlar massivi
+            $fasonlar = [
+                ["tag" => "Premium Balkon", "title" => "7 ko'z romlar (Balkon)", "desc" => "Katta hajmli va keng manzara ochib beruvchi, yuqori issiqlik izolyatsiyasiga ega balkon fasoni."],
+                ["tag" => "Klassik Italyan", "title" => "5 ko'z romlar (Italyan)", "desc" => "Yevropacha uslubdagi nafis chiziqlar va o'zgacha ochilish mexanizmiga ega dizayn."],
+                ["tag" => "Standard T", "title" => "3 ko'z romlar (T fason)", "desc" => "Klassik va ixcham xonadonlar uchun eng maqbul, sinovdan o'tgan mustahkam yechim."],
+                ["tag" => "Minimalist I", "title" => "2 ko'z romlar (I fason)", "desc" => "Oddiy va mukammal geometrik shakl. Kichik xonalar va oshxonalar uchun ideal tanlov."],
+                ["tag" => "Futuristik", "title" => "Hitech Fason Romlar", "desc" => "Eng so'nggi texnologiyalar asosida yasalgan, qora va metallik detallarga boy futuristik dizayn."]
+            ];
+foreach ($fasonlar as $fason) {
+                echo '<div class="card">';
+                echo '<span class="card-tag">' . $fason["tag"] . '</span>';
+                echo '<h3>' . $fason["title"] . '</h3>';
+                echo '<p>' . $fason["desc"] . '</p>';
+                echo '<button class="btn-gold order-btn" data-title="' . $fason["title"] . '" style="padding: 10px 20px; font-size: 0.7rem;">Buyurtma Berish</button>';
+                echo '</div>';
+            }
+            ?>
+        </div>
+
+        <!-- Prompt haqida ma'lumot (Talab bo'yicha kiritildi) -->
+        <div class="prompt-box">
+            <h3>Loyihaning Asosiy Prompt Ma'lumotlari:</h3>
+            <p><strong>Referens:</strong> Cartier (Le Choeur des Pierres) uslubi, Cinzel va Montserrat shriftlari, silliq animatsiyalar.</p>
+            <p><strong>Telegram Bot Token:</strong> <code><?php echo $bot_token; ?></code></p>
+            <p><strong>Vercel Link:</strong> <a href="<?php echo $vercel_url; ?>" target="_blank" style="color: var(--gold-color);"><?php echo $vercel_url; ?></a></p>
+            <p><strong>Mavjud Fasonlar:</strong> 7 ko'z romlar (Balkon), 5 ko'z romlar (Italyan), 3 ko'z romlar (T), 2 ko'z romlar (I), Hitech Fason romlar.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="aloqa">
+        <p>&copy; <?php echo date("Y"); ?> HASRAT ROM. Barcha huquqlar himoyalangan.</p>
+    </footer>
+
+    <!-- Telegram Web App Integration Script -->
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Mini App'ni to'liq ekranga yoyish
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const cards = document.querySelectorAll(".card");
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            cards.forEach(card => observer.observe(card));
+
+            // Buyurtma tugmasi bosilganda
+            const orderButtons = document.querySelectorAll(".order-btn");
+            orderButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    let fasonName = this.getAttribute("data-title");
+                    
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                        let data = JSON.stringify({ fason: fasonName });
+                        tg.sendData(data); // Botga ma'lumotni yuborib mini-appni yopadi
+                    } else {
+                        alert(fasonName.toUpperCase() + " uchun buyurtma qabul qilindi! Tez orada bog'lanamiz.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
