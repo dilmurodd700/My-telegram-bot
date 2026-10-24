@@ -136,9 +136,7 @@
             margin-bottom: 60px;
             color: var(--gold-color);
             letter-spacing: 0.15em;
-        }
-
-        .grid {
+        }.grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
@@ -248,8 +246,7 @@
         
         <div class="grid">
             <?php
-            // Ma'lumotlar va sozlamalar
-            $bot_token = "8699966136:AAHlGLDIP_wPxZGdN_oBthsv0BvuLdaB2Vc";
+            // Vercel havola manzili
             $vercel_url = "https://mytelegrambot-smoky.vercel.app";
 
             // 5 ta talab qilingan fasonlar massivi
@@ -259,8 +256,7 @@
                 ["tag" => "Standard T", "title" => "3 ko'z romlar (T fason)", "desc" => "Klassik va ixcham xonadonlar uchun eng maqbul, sinovdan o'tgan mustahkam yechim."],
                 ["tag" => "Minimalist I", "title" => "2 ko'z romlar (I fason)", "desc" => "Oddiy va mukammal geometrik shakl. Kichik xonalar va oshxonalar uchun ideal tanlov."],
                 ["tag" => "Futuristik", "title" => "Hitech Fason Romlar", "desc" => "Eng so'nggi texnologiyalar asosida yasalgan, qora va metallik detallarga boy futuristik dizayn."]
-            ];
-foreach ($fasonlar as $fason) {
+            ];foreach ($fasonlar as $fason) {
                 echo '<div class="card">';
                 echo '<span class="card-tag">' . $fason["tag"] . '</span>';
                 echo '<h3>' . $fason["title"] . '</h3>';
@@ -271,11 +267,10 @@ foreach ($fasonlar as $fason) {
             ?>
         </div>
 
-        <!-- Prompt haqida ma'lumot (Talab bo'yicha kiritildi) -->
+        <!-- Prompt haqida ma'lumot -->
         <div class="prompt-box">
             <h3>Loyihaning Asosiy Prompt Ma'lumotlari:</h3>
             <p><strong>Referens:</strong> Cartier (Le Choeur des Pierres) uslubi, Cinzel va Montserrat shriftlari, silliq animatsiyalar.</p>
-            <p><strong>Telegram Bot Token:</strong> <code><?php echo $bot_token; ?></code></p>
             <p><strong>Vercel Link:</strong> <a href="<?php echo $vercel_url; ?>" target="_blank" style="color: var(--gold-color);"><?php echo $vercel_url; ?></a></p>
             <p><strong>Mavjud Fasonlar:</strong> 7 ko'z romlar (Balkon), 5 ko'z romlar (Italyan), 3 ko'z romlar (T), 2 ko'z romlar (I), Hitech Fason romlar.</p>
         </div>
